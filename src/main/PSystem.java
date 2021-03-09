@@ -13,7 +13,8 @@ public class PSystem {
 	
 	enum Spread {
 		random,
-		uniform;
+		uniform,
+		block;
 	}
 	
 	// Default Variables
@@ -27,8 +28,6 @@ public class PSystem {
 	
 	public PSystem() {
 		loadConfig();
-		
-		this.particles = new Pointf[n];
 		initParticles(spread);
 		
 		this.mouse = new Mouse();
@@ -37,21 +36,37 @@ public class PSystem {
 	}
 	
 	private void initParticles(Spread spread) {
+		int m;
+		double m_d;
+		
 		switch(spread) {
 		case random:
 			Random r = new Random();
 			r.setSeed(System.currentTimeMillis() - System.nanoTime());
-			
+			this.particles = new Pointf[n];
 			for(int i=0; i<particles.length; i++) {
 				particles[i] = new Pointf(r.nextInt(Window.dim.width), r.nextInt(Window.dim.height));
 			}
 			break;
 		case uniform:
-			int n = (int) Math.sqrt(particles.length);
-			this.particles = new Pointf[n*n];
-			for (int j=0; j<n; j++) {
-				for(int i=0; i<n; i++) {
-					particles[i + j*n] = new Pointf((double)i*n/Window.dim.width, (double)j*n/Window.dim.height);
+			m = (int)Math.sqrt(n);
+			m_d = Math.sqrt(n);
+			this.particles = new Pointf[m*m];
+			for (int j=0; j<m; j++) {
+				for(int i=0; i<m; i++) {
+					particles[i + j*m] = new Pointf(Window.dim.width*i/m_d, Window.dim.height*j/m_d);
+					
+				}
+			}
+			break;
+		case block:
+			m = (int)Math.sqrt(n);
+			m_d = Math.sqrt(n);
+			double xoff=100, yoff=100;
+			this.particles = new Pointf[m*m];
+			for (int j=0; j<m; j++) {
+				for(int i=0; i<m; i++) {
+					particles[i + j*m] = new Pointf(xoff + 0.5*i*m_d/Window.dim.width, yoff + 0.5*j*m_d/Window.dim.height);
 					
 				}
 			}
@@ -80,11 +95,15 @@ public class PSystem {
 			p.x += p.vx * dt;
 			p.y += p.vy * dt;
 			
-			if(p.x < 0 || p.x > Window.dim.width) {
+			if(p.x < 0 && p.vx < 0) {
 				p.vx *= -1;
-			} if(p.y < 0 || p.y > Window.dim.height) {
+			} else if(p.x > Window.dim.width && p.vx > 0) {
+				p.vx *= -1;
+			} if(p.y < 0 && p.vy < 0) {
 				p.vy *= -1;
-			}
+			} else if(p.y > Window.dim.height && p.vy > 0) {
+				p.vy *= -1;
+			} 
 		}
 		
 	}

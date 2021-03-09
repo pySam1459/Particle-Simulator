@@ -24,9 +24,9 @@ public class Window extends Canvas {
 		this.frame = new JFrame(TITLE);
 		Window.window = this;
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize();
 		frame.setResizable(false);
 		frame.setVisible(true);
+		setSize();
 		frame.add(this);
 
 		frame.addWindowListener(new WindowAdapter() {
