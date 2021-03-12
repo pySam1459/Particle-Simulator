@@ -14,7 +14,7 @@ public class Window extends Canvas {
 
 	private static final long serialVersionUID = -4810618286807932601L;
 	private static final String TITLE = "Particle Simulator";
-	public static final Dimension dim = new Dimension(1280, 1280);
+	public static Dimension dim = new Dimension(1280, 1280);
 	
 	private static Window window;
 	private JFrame frame;
@@ -54,7 +54,7 @@ public class Window extends Canvas {
 		
 	}
 	
-	private void setSize() {
+	public void setSize() {
 		Insets insets = frame.getInsets();
 		frame.setSize(dim.width+insets.left+insets.right, dim.height+insets.top+insets.bottom);
 	}

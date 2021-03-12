@@ -1,6 +1,7 @@
 package main;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
@@ -129,7 +130,7 @@ public class PSystem {
 	
 	private void loadConfig() {
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(new File("res/system.cfg")));
+			BufferedReader br = new BufferedReader(new FileReader(new File("system.cfg")));
 			String line;
 			String[] keyValue;
 			while((line = br.readLine()) != null) {
@@ -153,6 +154,12 @@ public class PSystem {
 					
 					}
 					break;
+				case "dim":
+					String[] wh = keyValue[1].split(",");
+					if(wh[0].matches("\\d+") && wh[1].matches("\\d+")) {
+						Window.dim = new Dimension(Integer.parseInt(wh[0]), Integer.parseInt(wh[1]));
+						Window.getWindow().setSize();
+					}
 				default:
 					break;
 				}
