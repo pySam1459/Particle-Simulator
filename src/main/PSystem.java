@@ -97,12 +97,16 @@ public class PSystem {
 			p.y += p.vy * dt;
 			
 			if(p.x < 0 && p.vx < 0) {
+				p.x = -p.x;
 				p.vx *= -1;
 			} else if(p.x > Window.dim.width && p.vx > 0) {
+				p.x = 2*Window.dim.width - p.x;
 				p.vx *= -1;
 			} if(p.y < 0 && p.vy < 0) {
+				p.y = -p.y;
 				p.vy *= -1;
 			} else if(p.y > Window.dim.height && p.vy > 0) {
+				p.y = 2*Window.dim.height - p.y;
 				p.vy *= -1;
 			} 
 		}
