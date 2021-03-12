@@ -15,4 +15,8 @@ public class Pointf {
 		return Math.sqrt((xy.x-x)*(xy.x-x) + (xy.y-y)*(xy.y-y));
 		
 	}
+	
+	public double distanceSquared(Pointf xy) {
+		return (xy.x-x)*(xy.x-x) + (xy.y-y)*(xy.y-y);
+	}
 }

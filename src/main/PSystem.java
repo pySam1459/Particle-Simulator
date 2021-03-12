@@ -49,6 +49,7 @@ public class PSystem {
 				particles[i] = new Pointf(r.nextInt(Window.dim.width), r.nextInt(Window.dim.height));
 			}
 			break;
+			
 		case uniform:
 			m = (int)Math.sqrt(n);
 			m_d = Math.sqrt(n);
@@ -60,6 +61,7 @@ public class PSystem {
 				}
 			}
 			break;
+			
 		case block:
 			m = (int)Math.sqrt(n);
 			m_d = Math.sqrt(n);
@@ -84,11 +86,11 @@ public class PSystem {
 	
 	private void tickParticles(double dt) {
 		Pointf xy = mouse.getXY();
-		double d, F;
+		double d2, F;
 		for(Pointf p: particles) {
 			if(mouse.left) {
-				d = p.distance(xy);
-				F = G*dt / (d*d);
+				d2 = p.distanceSquared(xy);
+				F = G*dt / d2;
 				p.vx += F * (xy.x - p.x); // possible /d?
 				p.vy += F * (xy.y - p.y);
 			}
@@ -115,7 +117,6 @@ public class PSystem {
 	
 	private void checkReset() {
 		if(keyboard.get(KeyEvent.VK_R)) {
-			this.particles = new Pointf[n];
 			initParticles(spread);
 			
 		}
