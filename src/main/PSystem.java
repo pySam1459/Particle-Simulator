@@ -22,6 +22,8 @@ public class PSystem {
 	private int n = 100000;
 	private double G = 90000.0;
 	private Spread spread = Spread.random;
+	private double xoff=100, yoff=100;
+	private boolean boxed = true;
 	
 	private Pointf[] particles;
 	private Mouse mouse;
@@ -65,7 +67,6 @@ public class PSystem {
 		case block:
 			m = (int)Math.sqrt(n);
 			m_d = Math.sqrt(n);
-			double xoff=100, yoff=100;
 			this.particles = new Pointf[m*m];
 			for (int j=0; j<m; j++) {
 				for(int i=0; i<m; i++) {
@@ -98,19 +99,21 @@ public class PSystem {
 			p.x += p.vx * dt;
 			p.y += p.vy * dt;
 			
-			if(p.x < 0 && p.vx < 0) {
-				p.x = -p.x;
-				p.vx *= -1;
-			} else if(p.x > Window.dim.width && p.vx > 0) {
-				p.x = 2*Window.dim.width - p.x;
-				p.vx *= -1;
-			} if(p.y < 0 && p.vy < 0) {
-				p.y = -p.y;
-				p.vy *= -1;
-			} else if(p.y > Window.dim.height && p.vy > 0) {
-				p.y = 2*Window.dim.height - p.y;
-				p.vy *= -1;
-			} 
+			if(boxed) {
+				if(p.x < 0 && p.vx < 0) {
+					p.x = -p.x;
+					p.vx *= -1;
+				} else if(p.x > Window.dim.width && p.vx > 0) {
+					p.x = 2*Window.dim.width - p.x;
+					p.vx *= -1;
+				} if(p.y < 0 && p.vy < 0) {
+					p.y = -p.y;
+					p.vy *= -1;
+				} else if(p.y > Window.dim.height && p.vy > 0) {
+					p.y = 2*Window.dim.height - p.y;
+					p.vy *= -1;
+				} 
+			}
 		}
 		
 	}
@@ -137,34 +140,48 @@ public class PSystem {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(new File("system.cfg")));
 			String line;
-			String[] keyValue;
+			String[] keyValue, p2;
 			while((line = br.readLine()) != null) {
 				keyValue = line.replace(" ", "").split("=");
 				switch(keyValue[0]) {
 				case "n":
 					if(keyValue[1].matches("\\d+")) {
 						this.n = Integer.parseInt(keyValue[1]);
-					
 					}
 					break;
+					
 				case "G":
 					if(keyValue[1].matches("\\d*\\.\\d+")) {
 						this.G = Double.parseDouble(keyValue[1]);
-					
 					}
 					break;
+					
 				case "spread":
 					if(Spread.valueOf(keyValue[1]) != null) {
 						this.spread = Spread.valueOf(keyValue[1]);
-					
 					}
 					break;
+					
+				case "offset":
+					p2 = keyValue[1].split(",");
+					if(p2[0].matches("\\d+") && p2[1].matches("\\d+")) {
+						this.xoff = Integer.parseInt(p2[0]);
+						this.yoff = Integer.parseInt(p2[1]);
+					}
+					break;
+					
 				case "dim":
-					String[] wh = keyValue[1].split(",");
-					if(wh[0].matches("\\d+") && wh[1].matches("\\d+")) {
-						Window.dim = new Dimension(Integer.parseInt(wh[0]), Integer.parseInt(wh[1]));
+					p2 = keyValue[1].split(",");
+					if(p2[0].matches("\\d+") && p2[1].matches("\\d+")) {
+						Window.dim = new Dimension(Integer.parseInt(p2[0]), Integer.parseInt(p2[1]));
 						Window.getWindow().setSize();
 					}
+					break;
+					
+				case "boxed":
+					this.boxed = "true".equals(keyValue[1]);
+ 					break;
+ 					
 				default:
 					break;
 				}
