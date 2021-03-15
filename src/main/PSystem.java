@@ -1,13 +1,7 @@
 package main;
 
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Random;
 
 public class PSystem {
@@ -18,20 +12,14 @@ public class PSystem {
 		block;
 	}
 	
-	// Default Variables
-	private int n = 100000;
-	private double G = 90000.0;
-	private Spread spread = Spread.random;
-	private double xoff=100, yoff=100;
-	private boolean boxed = true;
-	
+	private Config config;
 	private Pointf[] particles;
 	private Mouse mouse;
 	private Keyboard keyboard;
 	
 	public PSystem() {
-		loadConfig();
-		initParticles(spread);
+		this.config = new Config();
+		initParticles(config.spread);
 		
 		this.mouse = new Mouse();
 		this.keyboard = new Keyboard();
@@ -46,15 +34,15 @@ public class PSystem {
 		case random:
 			Random r = new Random();
 			r.setSeed(System.currentTimeMillis() - System.nanoTime());
-			this.particles = new Pointf[n];
+			this.particles = new Pointf[config.n];
 			for(int i=0; i<particles.length; i++) {
 				particles[i] = new Pointf(r.nextInt(Window.dim.width), r.nextInt(Window.dim.height));
 			}
 			break;
 			
 		case uniform:
-			m = (int)Math.sqrt(n);
-			m_d = Math.sqrt(n);
+			m = (int)Math.sqrt(config.n);
+			m_d = Math.sqrt(config.n);
 			this.particles = new Pointf[m*m];
 			for (int j=0; j<m; j++) {
 				for(int i=0; i<m; i++) {
@@ -65,12 +53,13 @@ public class PSystem {
 			break;
 			
 		case block:
-			m = (int)Math.sqrt(n);
-			m_d = Math.sqrt(n);
+			m = (int)Math.sqrt(config.n);
+			m_d = Math.sqrt(config.n);
 			this.particles = new Pointf[m*m];
 			for (int j=0; j<m; j++) {
 				for(int i=0; i<m; i++) {
-					particles[i + j*m] = new Pointf(xoff + 0.5*i*m_d/Window.dim.width, yoff + 0.5*j*m_d/Window.dim.height);
+					particles[i + j*m] = new Pointf(config.xoff + 0.5*i*m_d/Window.dim.width, 
+													config.yoff + 0.5*j*m_d/Window.dim.height);
 					
 				}
 			}
@@ -87,11 +76,12 @@ public class PSystem {
 	
 	private void tickParticles(double dt) {
 		Pointf xy = mouse.getXY();
-		double d2, F;
+		double d2, F, mul;
 		for(Pointf p: particles) {
-			if(mouse.left) {
+			if(mouse.left || mouse.right) {
 				d2 = p.distanceSquared(xy);
-				F = G*dt / d2;
+				mul = mouse.left ? 1 : -1;
+				F = config.G*dt*mul / d2;
 				p.vx += F * (xy.x - p.x); // possible /d?
 				p.vy += F * (xy.y - p.y);
 			}
@@ -99,7 +89,10 @@ public class PSystem {
 			p.x += p.vx * dt;
 			p.y += p.vy * dt;
 			
-			if(boxed) {
+			p.vx -= p.vx * config.resistance * dt;
+			p.vy -= p.vy * config.resistance * dt;
+			
+			if(config.boxed) {
 				if(p.x < 0 && p.vx < 0) {
 					p.x = -p.x;
 					p.vx *= -1;
@@ -120,75 +113,20 @@ public class PSystem {
 	
 	private void checkReset() {
 		if(keyboard.get(KeyEvent.VK_R)) {
-			initParticles(spread);
+			initParticles(config.spread);
 			
 		}
 	}
 	
 	
 	public void render(Graphics2D g) {
-		g.setColor(Color.ORANGE);
+		g.setColor(config.backgroundColour);
+		g.fillRect(0, 0, Window.dim.width, Window.dim.height);
 		
+		g.setColor(config.particleColour);
 		for(Pointf p: particles) {
 			g.fillRect((int)p.x, (int)p.y, 1, 1);
 			
-		}
-	}
-	
-	
-	private void loadConfig() {
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(new File("system.cfg")));
-			String line;
-			String[] keyValue, p2;
-			while((line = br.readLine()) != null) {
-				keyValue = line.replace(" ", "").split("=");
-				switch(keyValue[0]) {
-				case "n":
-					if(keyValue[1].matches("\\d+")) {
-						this.n = Integer.parseInt(keyValue[1]);
-					}
-					break;
-					
-				case "G":
-					if(keyValue[1].matches("\\d*\\.\\d+")) {
-						this.G = Double.parseDouble(keyValue[1]);
-					}
-					break;
-					
-				case "spread":
-					if(Spread.valueOf(keyValue[1]) != null) {
-						this.spread = Spread.valueOf(keyValue[1]);
-					}
-					break;
-					
-				case "offset":
-					p2 = keyValue[1].split(",");
-					if(p2[0].matches("\\d+") && p2[1].matches("\\d+")) {
-						this.xoff = Integer.parseInt(p2[0]);
-						this.yoff = Integer.parseInt(p2[1]);
-					}
-					break;
-					
-				case "dim":
-					p2 = keyValue[1].split(",");
-					if(p2[0].matches("\\d+") && p2[1].matches("\\d+")) {
-						Window.dim = new Dimension(Integer.parseInt(p2[0]), Integer.parseInt(p2[1]));
-						Window.getWindow().setSize();
-					}
-					break;
-					
-				case "boxed":
-					this.boxed = "true".equals(keyValue[1]);
- 					break;
- 					
-				default:
-					break;
-				}
-			}
-		} catch(IOException e) {
-			System.out.println("Invalid 'system.cfg' file");
-			e.printStackTrace();
 		}
 	}
 

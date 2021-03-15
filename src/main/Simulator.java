@@ -1,6 +1,5 @@
 package main;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 
 
@@ -28,9 +27,6 @@ public class Simulator implements Runnable {
 	
 	private void render() {
 		Graphics2D g = window.getGraphics2D();
-		
-		g.setColor(Color.BLACK);
-		g.fillRect(0, 0, Window.dim.width, Window.dim.height);
 		
 		system.render(g);
 		
